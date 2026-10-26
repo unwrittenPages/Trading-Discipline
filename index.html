@@ -1735,7 +1735,7 @@
             try {
                 const app = window.fbSDK.initializeApp(cfg, 'tradingApp');
                 dbInstance = window.fbSDK.getDatabase(app);
-                dbRef = window.fbSDK.ref(dbInstance, 'reports');
+               dbRef = window.fbSDK.ref(dbInstance, 'reports_timur');
 
                 window.fbSDK.onValue(dbRef, (snapshot) => {
                     const data = snapshot.val();
