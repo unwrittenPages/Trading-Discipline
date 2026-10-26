@@ -313,24 +313,18 @@
                     </div>
                 </div>
 
-                <!-- Рабочая область режима Выходного Дня -->
-                <div id="weekend-active-panel" class="pt-2 space-y-4">
+                <!-- Рабочая область Активной Сессии (по будням с 9:00 до 12:00) -->
+                <div id="trading-active-panel" class="pt-2 space-y-4 hidden">
                     <div class="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 rounded-xl bg-brand-dark/60 border border-brand-border">
                         <div class="flex items-center space-x-3">
                             <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-lg border border-amber-500/20">
-                                <i class="fa-solid fa-hourglass-start"></i>
+                                <i class="fa-solid fa-compass"></i>
                             </div>
                             <div>
-                                <div class="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">До старта сессии Франкфурта</div>
-                                <div id="weekend-countdown-timer" class="text-lg font-bold text-amber-400 font-mono">00ч 00мин 00сек</div>
+                                <div class="text-[10px] text-amber-400 font-semibold uppercase tracking-wider">Фокус сессии AMD</div>
+                                <div class="text-xs text-gray-300 font-medium">Ожидание манипуляции (снятия Азии) → Имбаланс → Тест</div>
                             </div>
                         </div>
-
-                        <!-- Кнопка вызова Модуля Полезных Выходных -->
-                        <button onclick="openWeekendModal()" class="w-full sm:w-auto text-xs bg-gradient-to-r from-amber-500/20 to-amber-600/20 hover:from-amber-500/30 hover:to-amber-600/30 text-amber-300 font-semibold px-4 py-2.5 rounded-xl border border-amber-500/40 flex items-center justify-center space-x-2 transition shadow-lg shadow-amber-500/5">
-                            <i class="fa-solid fa-brain text-amber-400"></i>
-                            <span>Проводим выходные с пользой</span>
-                        </button>
                     </div>
                 </div>
             </div>
@@ -989,8 +983,7 @@
             }, 1000); 
         });
 
-       // Торговая сессия, проверка завершённости дня и логика 1-дневного Блока
-        function initSessionTimer() {
+       function initSessionTimer() {
             const now = new Date();
             const dayOfWeek = now.getDay(); // 0 - ВС, 1 - ПН, ..., 5 - ПТ, 6 - СБ
             const hours = now.getHours();
@@ -1017,29 +1010,25 @@
             const timerCard = document.getElementById('session-timer-card');
             const wizardContainer = document.getElementById('wizard-container');
             const completedCard = document.getElementById('completed-day-card');
+            const weekendPanel = document.getElementById('weekend-active-panel');
+            const tradingPanel = document.getElementById('trading-active-panel');
 
             // 1. ПРОВЕРКА НА АКТИВНЫЙ БЛОК С ПРОШЛОЙ СЕССИИ (Защита на следующий день)
-            // Ищем последнюю запись текущего пользователя
             const lastUserReport = reportsHistory.find(item => item.author === currentUser);
             
             if (lastUserReport && lastUserReport.compliance !== 'clean') {
                 const reportDate = new Date(lastUserReport.id);
-                
-                // Вычисляем дату и время точной разблокировки (строго в 09:00 на 2-й торговый день после ошибки)
                 let unlockDate = new Date(reportDate);
                 const repDay = reportDate.getDay();
 
-                // Если ошибка совершена в Пятницу (5) или Субботу (6) -> Блок весь Понедельник, разблокировка во Вторник в 09:00
                 if (repDay === 5 || repDay === 6) {
-                    const daysToAdd = (repDay === 5) ? 4 : 3; // До Вторника
+                    const daysToAdd = (repDay === 5) ? 4 : 3;
                     unlockDate.setDate(unlockDate.getDate() + daysToAdd);
                 } else {
-                    // Иначе разблокировка через 2 дня в 09:00 (пропускаем заблокированный день)
                     unlockDate.setDate(unlockDate.getDate() + 2);
                 }
                 unlockDate.setHours(9, 0, 0, 0);
 
-                // Если текущее время ещё НЕ достигло даты/времени разблокировки — удерживаем БЛОК
                 if (now < unlockDate) {
                     if (timerCard) timerCard.classList.add('hidden');
                     if (wizardContainer) wizardContainer.classList.add('hidden');
@@ -1048,18 +1037,16 @@
                     const authorInfoEl = document.getElementById('completed-author-info');
                     if (authorInfoEl) authorInfoEl.innerText = `Дисциплинарный блок (${lastUserReport.author})`;
 
-                   const badgeContainerEl = document.getElementById('completed-badge-container');
-
-if (badgeContainerEl && badgeContainerEl.dataset.badgeType !== 'blocked') {
-    badgeContainerEl.innerHTML = `
-        <span class="px-3 py-1 rounded-full text-xs font-bold bg-rose-500/20 text-rose-400 border border-rose-500/40 pulse-smooth">
-            <i class="fa-solid fa-lock text-amber-400 mr-1.5"></i>
-            БЛОК ТОРГОВЛИ: 1 ДЕНЬ
-        </span>
-    `;
-
-    badgeContainerEl.dataset.badgeType = 'blocked';
-}
+                    const badgeContainerEl = document.getElementById('completed-badge-container');
+                    if (badgeContainerEl && badgeContainerEl.dataset.badgeType !== 'blocked') {
+                        badgeContainerEl.innerHTML = `
+                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-rose-500/20 text-rose-400 border border-rose-500/40 pulse-smooth">
+                                <i class="fa-solid fa-lock text-amber-400 mr-1.5"></i>
+                                БЛОК ТОРГОВЛИ: 1 ДЕНЬ
+                            </span>
+                        `;
+                        badgeContainerEl.dataset.badgeType = 'blocked';
+                    }
 
                     const unlockDateStr = `${unlockDate.getDate()} ${months[unlockDate.getMonth()]} в 09:00`;
                     const thoughtEl = document.getElementById('completed-spiritual-thought');
@@ -1068,7 +1055,7 @@ if (badgeContainerEl && badgeContainerEl.dataset.badgeType !== 'blocked') {
                             <div class="space-y-2">
                                 <p class="font-semibold text-rose-300">Почему этот блок необходим и почему наказание настолько строгое?</p>
                                 <p class="text-gray-300">Даже если завтра Брат заберёт свои +2% профита, а ты останешься позади и лишён этих денег — прими это смиренно как целебное лекарство от гордыни и зависти.</p>
-                                <p class="text-gray-400">Блок на 1 день убивает азарт и иллюзию контроля. Мы учимся радоваться успехам Брата больше, чем собственным процентам, осознавая полную немощь своего «я». Торговля без дисциплины — это результат легкомысленности. Поэтому у тебя есть время поразмыслить над ошибкой, и зафиксировать ее в своем разуме как что-то, к чему точчно не стоит возвращаться.</p>
+                                <p class="text-gray-400">Блок на 1 день убивает азарт и иллюзию контроля. Мы учимся радоваться успехам Брата больше, чем собственным процентам, осознавая полную немощь своего «я». Торговля без дисциплины — это результат легкомысленности. Поэтому у тебя есть время поразмыслить над ошибкой, и зафиксировать ее в своем разуме как что-то, к чему точно не стоит возвращаться.</p>
                             </div>
                         `;
                     }
@@ -1077,7 +1064,7 @@ if (badgeContainerEl && badgeContainerEl.dataset.badgeType !== 'blocked') {
                     if (countdownTextEl) {
                         countdownTextEl.innerHTML = `<span class="text-rose-400 font-bold">Торговля заблокирована. Доступ откроется строго: ${unlockDateStr}</span>`;
                     }
-                    return; // Полная заморозка, выход из функции
+                    return;
                 }
             }
 
@@ -1096,16 +1083,15 @@ if (badgeContainerEl && badgeContainerEl.dataset.badgeType !== 'blocked') {
                 const authorInfoEl = document.getElementById('completed-author-info');
                 if (authorInfoEl) authorInfoEl.innerText = `Запись зафиксирована (${userTodayReport.author})`;
                 
-              const badgeContainerEl = document.getElementById('completed-badge-container');
+                const badgeContainerEl = document.getElementById('completed-badge-container');
+                const badgeType = isClean ? 'clean' : 'blocked';
 
-const badgeType = isClean ? 'clean' : 'blocked';
-
-if (badgeContainerEl && badgeContainerEl.dataset.badgeType !== badgeType) {
-    badgeContainerEl.innerHTML = isClean
-    ? `<span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">100% По системе</span>`
-    : `<span class="px-3 py-1 rounded-full text-xs font-bold bg-rose-500/20 text-rose-400 border border-rose-500/40 pulse-smooth"><i class="fa-solid fa-lock text-amber-400 mr-1.5"></i>БЛОК ТОРГОВЛИ: 1 ДЕНЬ</span>`;
-    badgeContainerEl.dataset.badgeType = badgeType;
-}
+                if (badgeContainerEl && badgeContainerEl.dataset.badgeType !== badgeType) {
+                    badgeContainerEl.innerHTML = isClean
+                    ? `<span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">100% По системе</span>`
+                    : `<span class="px-3 py-1 rounded-full text-xs font-bold bg-rose-500/20 text-rose-400 border border-rose-500/40 pulse-smooth"><i class="fa-solid fa-lock text-amber-400 mr-1.5"></i>БЛОК ТОРГОВЛИ: 1 ДЕНЬ</span>`;
+                    badgeContainerEl.dataset.badgeType = badgeType;
+                }
               
                 const thoughtEl = document.getElementById('completed-spiritual-thought');
                 if (thoughtEl) {
@@ -1121,7 +1107,6 @@ if (badgeContainerEl && badgeContainerEl.dataset.badgeType !== badgeType) {
                     }
                 }
 
-                // Расчёт даты снятия
                 let targetDayName = "Завтра в 09:00";
                 if (!isClean) {
                     if (dayOfWeek === 5 || dayOfWeek === 6) targetDayName = "Во вторник в 09:00";
@@ -1135,12 +1120,15 @@ if (badgeContainerEl && badgeContainerEl.dataset.badgeType !== badgeType) {
                 return;
             }
 
-           // 3. Выходной день (Суббота / Воскресенье) без сданного отчёта за сегодня
+            // 3. Выходной день (Суббота / Воскресенье) без сданного отчёта за сегодня
             if (dayOfWeek === 6 || dayOfWeek === 0) {
                 if (completedCard) completedCard.classList.add('hidden');
                 if (wizardContainer) wizardContainer.classList.add('hidden');
                 
-                // Показываем карточку таймера в режиме выходного дня
+                // Показываем панель выходных, скрываем торговую панель сессии
+                if (weekendPanel) weekendPanel.classList.remove('hidden');
+                if (tradingPanel) tradingPanel.classList.add('hidden');
+                
                 if (timerCard) {
                     timerCard.classList.remove('hidden');
                     const badgeTextEl = document.getElementById('session-badge-text');
@@ -1151,9 +1139,6 @@ if (badgeContainerEl && badgeContainerEl.dataset.badgeType !== badgeType) {
                     
                     const remTextEl = document.getElementById('session-remaining-text');
                     if (remTextEl) remTextEl.innerText = "Отдых до понедельника, 09:00";
-                    
-                    const progressBarEl = document.getElementById('session-progress-bar');
-                    if (progressBarEl) progressBarEl.style.width = "100%";
                 }
                 return;
             }
@@ -1164,15 +1149,16 @@ if (badgeContainerEl && badgeContainerEl.dataset.badgeType !== badgeType) {
                 if (wizardContainer) wizardContainer.classList.add('hidden');
                 if (completedCard) completedCard.classList.add('hidden');
 
-                const elapsed = totalCurrentSeconds - startSeconds;
-                const progressPercent = Math.min(100, Math.max(0, (elapsed / (endSeconds - startSeconds)) * 100));
-                const progressBarEl = document.getElementById('session-progress-bar');
-                if (progressBarEl) progressBarEl.style.width = `${progressPercent}%`;
+                // Показываем торговую панель фокуса сессии, скрываем панель выходных
+                if (weekendPanel) weekendPanel.classList.add('hidden');
+                if (tradingPanel) tradingPanel.classList.remove('hidden');
 
+                const elapsed = totalCurrentSeconds - startSeconds;
                 const remainingSecs = endSeconds - totalCurrentSeconds;
                 const remHours = Math.floor(remainingSecs / 3600);
                 const remMins = Math.floor((remainingSecs % 3600) / 60);
                 const remSecs = remainingSecs % 60;
+                
                 const remTextEl = document.getElementById('session-remaining-text');
                 if (remTextEl) remTextEl.innerText = `осталось ${remHours} ч ${remMins} мин ${remSecs} сек`;
             } else {
