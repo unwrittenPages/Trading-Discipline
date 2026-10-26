@@ -1382,8 +1382,7 @@ const DB_NODE_NAME = 'reports_timur';
             document.getElementById('lightbox-modal').classList.add('hidden');
         }
 
-        // Submitting Report
-        function submitReport() {
+    function submitReport() {
             if (!reportData.image) {
                 alert('Пожалуйста, прикрепите скриншот ордеров перед публикацией.');
                 return;
@@ -1402,11 +1401,10 @@ const DB_NODE_NAME = 'reports_timur';
 
             if (isFirebaseConnected && dbRef) {
                 window.fbSDK.push(dbRef, newEntry).then(() => {
-                    // Оптимистично добавляем в локальную историю и сразу переключаем UI
-                    reportsHistory.unshift(newEntry);
-                    renderReportsFeed();
+                    // Firebase сам мгновенно пришлет актуальный список через onValue, 
+                    // поэтому ручной unshift больше не нужен — дубликата не будет.
                     resetWizard();
-                    initSessionTimer(); // <--- Мгновенно переключает блок на карточку завершённого дня
+                    initSessionTimer(); 
                 }).catch(err => {
                     console.error("Firebase push error:", err);
                     saveLocally(newEntry);
