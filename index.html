@@ -934,6 +934,9 @@
         let reportsHistory = [];
         let openAccordions = [];
 
+        // Имя узла в базе данных для этого сайта
+const DB_NODE_NAME = 'reports_timur';
+        
         // Пароль для досрочного разблокирования формы во время сессии (можно изменить здесь)
         const SESSION_UNLOCK_PASSWORD = '1888';
 
@@ -1438,15 +1441,21 @@
             const { id, fbKey } = itemToDelete;
 
             if (isFirebaseConnected && fbKey && dbInstance) {
-                const itemRef = window.fbSDK.ref(dbInstance, `reports/${fbKey}`);
-                window.fbSDK.remove(itemRef).catch(err => console.error("Delete error:", err));
+                // Используем ту же самую переменную папки для удаления
+                const itemRef = window.fbSDK.ref(dbInstance, `${DB_NODE_NAME}/${fbKey}`);
+                window.fbSDK.remove(itemRef).then(() => {
+                    closeDeleteModal();
+                }).catch(err => {
+                    console.error("Delete error:", err);
+                    alert("Ошибка при удалении из базы данных.");
+                    closeDeleteModal();
+                });
             } else {
                 reportsHistory = reportsHistory.filter(item => item.id !== id);
                 localStorage.setItem('local_trading_reports', JSON.stringify(reportsHistory));
                 renderReportsFeed();
+                closeDeleteModal();
             }
-
-            closeDeleteModal();
         });
 
         function resetWizard() {
@@ -1735,7 +1744,7 @@
             try {
                 const app = window.fbSDK.initializeApp(cfg, 'tradingApp');
                 dbInstance = window.fbSDK.getDatabase(app);
-               dbRef = window.fbSDK.ref(dbInstance, 'reports_timur');
+               dbRef = window.fbSDK.ref(dbInstance, DB_NODE_NAME);
 
                 window.fbSDK.onValue(dbRef, (snapshot) => {
                     const data = snapshot.val();
