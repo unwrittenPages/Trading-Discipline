@@ -953,30 +953,207 @@ const SESSION_UNLOCK_PASSWORD = '1888';
         };
 
         const rulesList = [
-            "Внутренний настрой и абсолютное спокойствие",
-            "Трендовые показатели и структура рынка",
-            "Ликвидность и зоны интереса (POI)",
-            "Правило одного актива и жесткий лимит риска",
-            "Идентификация сетапа и иерархия таймфреймов",
-            "Манипуляция и подтверждение входа",
-            "Отслеживание критериев торговой модели",
-            "Цели и риск-менеджмент (R:R)",
-            "Уведомления и динамическое управление позицией",
-            "Перезаход только при повторном сетапе"
+            {
+                title: "Введение и дисциплина",
+                content: "Перед вами настоящий регламент, который представляет собой <strong class=\"text-white font-semibold\">комплексное практическое руководство по торговому алгоритму AMD</strong>. Каждое правило и лимит обязательны к исполнению без исключений. <strong class=\"text-white font-semibold\">Дисциплина и полная капитуляция перед системой</strong> — залог сохранности капитала."
+            },
+            {
+                title: "Этап 1: Внутренний настрой на систему и ничего лишнего",
+                content: "• <strong class=\"text-white font-semibold\">Абсолютное спокойствие:</strong> Вход в рынок осуществляется исключительно с <em class=\"text-gray-200 italic\">холодной и чистой головой</em>.\n• <strong class=\"text-white font-semibold\">Изоляция от внешнего шума:</strong> Все бытовые проблемы, эмоции и чужие мнения остаются строго за порогом торгового места.\n• <strong class=\"text-white font-semibold\">Полное принятие риска:</strong> Заранее принята цена потенциального стоп-лосса в текущей сессии. Каждая свеча не случайна, а <em class=\"text-gray-200 italic\">предначертана Богом</em>."
+            },
+            {
+                title: "Этап 2: Проверка трендовых показателей и структуры",
+                content: "• <strong class=\"text-white font-semibold\">Поиск точек А и Б (1D и 4Н):</strong> Определение четких и понятных глобальных ориентиров — откуда и куда движется крупный капитал. Анализ рыночной структуры ведется строго на 15-минутном таймфрейме.\n• <strong class=\"text-white font-semibold\">Правило истинного закрепления:</strong> Любое обновление структуры считается ложным, пока не выполнено условие истинного закрепления телом 3-4 свечей за предыдущим экстремумом."
+            },
+            {
+                title: "Этап 3: Разметка ликвидности и зон интереса",
+                content: "• <strong class=\"text-white font-semibold\">Поиск зон AMD:</strong> Определение фазы аккумуляции, выявление ключевых зон для потенциальной манипуляции ценой и определение целевых таргетов."
+            },
+            {
+                title: "Этап 4: Правило одного актива и жесткий лимит",
+                content: "• <strong class=\"text-white font-semibold\">Фокус на двух активах:</strong> В аналитическом отслеживании находятся только два инструмента. В отработке одного дня принимает участие только один из них."
+            },
+            {
+                title: "Этап 5: Идентификация сетапа и иерархия таймфреймов",
+                content: "На данном этапе четко определяется тип текущей сделки: минутный, пятиминутный или свинговый.\n\n" +
+                `<div class="overflow-x-auto my-3"><table class="w-full text-left border-collapse text-xs"><thead><tr class="border-b border-brand-border text-amber-400"><th class="p-2">Тип сетапа</th><th class="p-2">Старший ТФ</th><th class="p-2">Средний ТФ</th><th class="p-2">Младший ТФ</th></tr></thead><tbody class="divide-y divide-brand-border/60 text-gray-300"><tr><td class="p-2 font-semibold text-white">Свинговый</td><td class="p-2">1D</td><td class="p-2">4H</td><td class="p-2">1H</td></tr><tr><td class="p-2 font-semibold text-white">5-минутный</td><td class="p-2">4H</td><td class="p-2">1H</td><td class="p-2">5m</td></tr></tbody></table></div>`
+            },
+            {
+                title: "Этап 6: Манипуляция. Ожидание",
+                content: "1. <strong class=\"text-white font-semibold\">Временное окно:</strong> Отслеживание и ожидание манипуляций происходит строго <strong class=\"text-white font-semibold\">с 09:00 до 12:15</strong>."
+            },
+            {
+                title: "Этап 7: Отслеживание критериев модели",
+                content: "• <strong class=\"text-white font-semibold\">Скорость откупа:</strong> Импульсный возврат цены должен мгновенно перекрыть как минимум одну треть (1/3) движения."
+            },
+            {
+                title: "Этап 8: Цели и риск-менеджмент",
+                content: "• <strong class=\"text-white font-semibold\">Риск на сделку:</strong> Строго 1% от депозита. Базовое соотношение RR — 1:2."
+            },
+            {
+                title: "Этап 9: Уведомления и динамическое управление позицией",
+                content: "• После входа ставятся два алерта, терминал полностью закрывается для сохранения эмоционального покоя."
+            },
+            {
+                title: "Этап 10: Правило перезахода после стопа",
+                content: "• Перезаход разрешен только при повторном переснятии ликвидности и формировании второй модели после 10:00."
+            },
+            {
+                title: "Этап 11: Фиксация результатов и заполнение торгового журнала",
+                content: "• Каждая сделка заносится в журнал со скриншотами момента входа и выхода."
+            }
         ];
 
-        const errorOptions = [
-            "1. Внутренний настрой",
-            "2. Трендовые показатели и структура",
-            "3. Ликвидность и зоны интереса",
-            "4. Правило одного актива и жесткий лимит",
-            "5. Идентификация сетапа и иерархия таймфреймов",
-            "6. Манипуляция",
-            "7. Отслеживание критериев модели",
-            "8. Цели и риск-менеджмент",
-            "9. Уведомления и динамическое управление позицией",
-            "10. Перезаход"
-        ];
+        let activeRuleIndex = null;
+        let ruleFontSizeLevel = 14;
+
+        function initRulesAndErrors() {
+            renderRulesModalList();
+            const errorContainer = document.getElementById('error-list');
+            if (errorContainer) {
+                errorContainer.innerHTML = '';
+                errorOptions.forEach(err => {
+                    const btn = document.createElement('button');
+                    btn.className = "glass-card p-3 rounded-xl text-left border border-brand-border hover:border-rose-400/50 text-xs text-gray-300 hover:text-white font-medium hover:bg-rose-500/10 transition w-full";
+                    btn.innerText = err;
+                    btn.onclick = () => selectError(err);
+                    errorContainer.appendChild(btn);
+                });
+            }
+        }
+
+        function formatMarkdownText(text) {
+            if (!text) return '';
+            return text
+                .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white font-semibold">$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em class="text-gray-200 italic">$1</em>');
+        }
+
+        function adjustRuleFontSize(direction) {
+            ruleFontSizeLevel += direction * 2;
+            if (ruleFontSizeLevel < 12) ruleFontSizeLevel = 12;
+            if (ruleFontSizeLevel > 22) ruleFontSizeLevel = 22;
+            const container = document.getElementById('rule-modal-content-container');
+            if (container) container.style.fontSize = `${ruleFontSizeLevel}px`;
+        }
+
+        function renderRulesModalList() {
+            const container = document.getElementById('rule-modal-content-container');
+            const titleEl = document.getElementById('rule-modal-main-title');
+            const footerCloseBtn = document.getElementById('rule-modal-footer-close');
+            const topBtn = document.getElementById('rule-modal-top-btn');
+            const topIcon = document.getElementById('rule-modal-top-icon');
+
+            if (!container) return;
+            container.style.fontSize = `${ruleFontSizeLevel}px`;
+            container.innerHTML = '';
+
+            if (activeRuleIndex === null) {
+                if (titleEl) {
+                    titleEl.innerText = `Кодекс Дисциплины и Регламент AMD`;
+                    titleEl.className = "truncate block w-full";
+                }
+                if (footerCloseBtn) footerCloseBtn.classList.remove('hidden');
+                if (topBtn && topIcon) {
+                    topIcon.className = "fa-solid fa-xmark text-gray-400 group-hover:text-amber-400 transition-colors";
+                    topBtn.onclick = toggleRuleModal;
+                }
+
+                rulesList.forEach((rule, idx) => {
+                    const btn = document.createElement('div');
+                    btn.className = "glass-card p-3.5 mx-2 sm:mx-3 rounded-xl border border-brand-border hover:border-amber-400/50 cursor-pointer transition flex items-center justify-between font-medium group relative hover:z-20";
+                    btn.innerHTML = `
+                        <div class="flex items-center space-x-2 min-w-0 pr-2">
+                            <span class="w-6 h-6 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold text-[11px] border border-amber-500/20 flex-shrink-0">${idx}</span>
+                            <span class="truncate">${rule.title}</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-gray-500 group-hover:text-amber-400 text-xs transition-all duration-300 transform group-hover:translate-x-0.5 flex-shrink-0"></i>
+                    `;
+                    btn.onclick = () => {
+                        activeRuleIndex = idx;
+                        renderRulesModalList();
+                    };
+                    container.appendChild(btn);
+                });
+            } else {
+                if (footerCloseBtn) footerCloseBtn.classList.add('hidden');
+                const rule = rulesList[activeRuleIndex];
+                if (titleEl) {
+                    if (rule.title.length > 30) {
+                        titleEl.className = "block overflow-hidden relative w-full text-left rule-marquee-container";
+                        titleEl.innerHTML = `<span class="rule-marquee-text"><span class="inline-block marquee-item-1">${rule.title}</span><span class="inline-block marquee-item-2" style="padding-left: 60px;">${rule.title}</span></span>`;
+                        forceRefreshMarquee(titleEl);
+                    } else {
+                        titleEl.className = "block text-left w-full truncate";
+                        titleEl.innerText = rule.title;
+                    }
+                }
+                
+                if (topBtn && topIcon) {
+                    topIcon.className = "fa-solid fa-xmark text-gray-400 group-hover:text-amber-400 transition-colors";
+                    topBtn.onclick = closeRuleDetail;
+                }
+
+                const detailDiv = document.createElement('div');
+                detailDiv.className = "space-y-4 relative p-1 step-transition slide-in";
+
+                const formattedContent = rule.content.split('\n').map(line => {
+                    return `<p class="leading-relaxed text-gray-300">${formatMarkdownText(line)}</p>`;
+                }).join('');
+
+                const isLastStep = (activeRuleIndex === rulesList.length - 1);
+                let stepFooterHtml = isLastStep ? `
+                    <div class="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-start space-x-3 text-xs text-gray-300 leading-relaxed mt-4">
+                        <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm border border-amber-500/30 shrink-0 mt-0.5"><i class="fa-solid fa-shield-heart"></i></div>
+                        <div><span class="font-bold text-amber-300 block mb-0.5">Слава Господу за этот регламент!</span>Пусть эти правила хранят твой разум от азарта.</div>
+                    </div>
+                ` : `
+                    <div class="pt-4 flex justify-end">
+                        <button onclick="goToNextRuleStep()" class="text-xs bg-amber-500 hover:bg-amber-400 text-black font-bold px-4 py-2.5 rounded-xl flex items-center space-x-2 transition shadow-lg shadow-amber-500/10">
+                            <span>Перейти к следующему этапу</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                `;
+
+                detailDiv.innerHTML = `<div class="space-y-2.5 bg-brand-dark/40 p-4 rounded-xl border border-brand-border/60">${formattedContent}</div>${stepFooterHtml}`;
+                container.appendChild(detailDiv);
+                setTimeout(() => detailDiv.classList.remove('slide-in'), 50);
+            }
+        }
+
+        function forceRefreshMarquee(titleEl) {
+            if (!titleEl) return;
+            setTimeout(() => {
+                const firstItem = titleEl.querySelector('.marquee-item-1');
+                const wrapper = titleEl.querySelector('.rule-marquee-text');
+                if (firstItem && wrapper) {
+                    wrapper.style.animation = 'none';
+                    wrapper.offsetHeight;
+                    const totalDist = firstItem.offsetWidth + 60;
+                    wrapper.style.setProperty('--scroll-distance', `-${totalDist}px`);
+                    wrapper.style.animation = '';
+                }
+            }, 65);
+        }
+
+        function goToNextRuleStep() {
+            const container = document.getElementById('rule-modal-content-container');
+            const currentDetail = container.querySelector('.step-transition');
+            if (currentDetail) currentDetail.classList.add('slide-out');
+            setTimeout(() => {
+                if (activeRuleIndex !== null && activeRuleIndex < rulesList.length - 1) {
+                    activeRuleIndex++;
+                    renderRulesModalList();
+                    container.scrollTop = 0;
+                }
+            }, 300);
+        }
+
+        function closeRuleDetail() {
+            activeRuleIndex = null;
+            renderRulesModalList();
+        }
 
        window.addEventListener('load', () => {
             updateUserUI();
