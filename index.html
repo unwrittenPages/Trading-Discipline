@@ -935,7 +935,13 @@
         let openAccordions = [];
 
         // Имя узла в базе данных для этого сайта
-const DB_NODE_NAME = 'reports_timur';
+const DB_NODE_NAME = 'reports_timur'; 
+
+// Переменная режима ввода отчёта за вчера
+let isYesterdayModeActive = false;
+
+// Пароль для досрочного разблокирования формы во время сессии
+const SESSION_UNLOCK_PASSWORD = '1888';
         
         // Пароль для досрочного разблокирования формы во время сессии (можно изменить здесь)
         const SESSION_UNLOCK_PASSWORD = '1888';
@@ -1742,8 +1748,9 @@ const DB_NODE_NAME = 'reports_timur';
             try {
                 const app = window.fbSDK.initializeApp(cfg, 'tradingApp');
                 dbInstance = window.fbSDK.getDatabase(app);
-               dbRef = window.fbSDK.ref(dbInstance, DB_NODE_NAME);
+                dbRef = window.fbSDK.ref(dbInstance, DB_NODE_NAME);
 
+                // СЛУШАТЕЛЬ ОСНОВНЫХ ОТЧЁТОВ
                 window.fbSDK.onValue(dbRef, (snapshot) => {
                     const data = snapshot.val();
                     if (data) {
@@ -1754,13 +1761,57 @@ const DB_NODE_NAME = 'reports_timur';
                     } else {
                         reportsHistory = [];
                     }
+                    window._reportsLoadedOnce = true;
+                    window._statsLoadedOnce = true;
                     renderReportsFeed();
                 });
 
+                // СЛУШАТЕЛЬ БЭКТЕСТОВ
+                const backtestRef = window.fbSDK.ref(dbInstance, `${DB_NODE_NAME}_backtests`);
+                window.fbSDK.onValue(backtestRef, (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        const allBacktests = Object.entries(data).map(([key, val]) => ({
+                            ...val,
+                            fbKey: key
+                        }));
+                        localStorage.setItem('local_backtest_reports', JSON.stringify(allBacktests));
+                    } else {
+                        localStorage.setItem('local_backtest_reports', JSON.stringify([]));
+                    }
+                    renderBacktestStats();
+                    renderBacktestHistory();
+                });
+
+                // СЛУШАТЕЛЬ ЧЕКБОКСОВ ВЫХОДНЫХ
+                ['Vladimir', 'Timur'].forEach(userName => {
+                    const checkRef = window.fbSDK.ref(dbInstance, `${DB_NODE_NAME}_checklist_${userName}`);
+                    window.fbSDK.onValue(checkRef, (snapshot) => {
+                        const data = snapshot.val();
+                        if (data) {
+                            localStorage.setItem(`weekend_checklist_${userName}`, JSON.stringify(data));
+                        }
+                        if (userName === currentUser) {
+                            loadSavedChecklistState();
+                        }
+                    });
+                });
+                
                 isFirebaseConnected = true;
                 const badge = document.getElementById('sync-status-badge');
                 badge.className = "text-[10px] px-2 py-0.5 rounded-full font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/35";
                 badge.innerHTML = '<i class="fa-solid fa-wifi mr-1"></i> Live Sync';
+
+                // СЛУШАТЕЛЬ РАЗБЛОКИРОВКИ СЕССИИ
+                const now = new Date();
+                const todayKey = `session_unlocked_${now.getFullYear()}_${now.getMonth()}_${now.getDate()}`;
+                const unlockRef = window.fbSDK.ref(dbInstance, `unlocks/${todayKey}`);
+                window.fbSDK.onValue(unlockRef, (snapshot) => {
+                    if (snapshot.val() === true) {
+                        sessionStorage.setItem(todayKey, 'true');
+                        initSessionTimer();
+                    }
+                });
             } catch (err) {
                 console.error("Firebase init failed:", err);
                 fallbackToLocal();
