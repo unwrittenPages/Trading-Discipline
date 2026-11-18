@@ -2835,16 +2835,16 @@ function resetWizard() {
 
         // Вшитые настройки для автоматической синхронизации с братом
         const DEFAULT_CONFIG = {
-            databaseURL: "https://trading-journal-bb826-default-rtdb.firebaseio.com/",
-            apiKey: "AIzaSyBCJAnn1JlzPgfm1Fxd-RRGksk5YdgTjkc",
-            projectId: "trading-journal-bb826"
+            databaseURL: "https://trading-journal-timur-default-rtdb.firebaseio.com",
+            apiKey: "AIzaSyB8RWZnEKXVN4gDHvuDId1fBuG7ztTRlQQ",
+            projectId: "trading-journal-timur"
         };
         
         function loadFirebaseConfig() {
-            let savedConfig = localStorage.getItem('firebase_sync_config');
+            let savedConfig = localStorage.getItem('firebase_sync_config_timur');
             if (!savedConfig) {
                 savedConfig = JSON.stringify(DEFAULT_CONFIG);
-                localStorage.setItem('firebase_sync_config', savedConfig);
+                localStorage.setItem('firebase_sync_config_timur', savedConfig);
             }
             
             if (savedConfig) {
