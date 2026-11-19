@@ -3623,27 +3623,32 @@ function handleExtraBacktest(event) {
             const reader = new FileReader();
             reader.onload = function(e) {
                 const timestamp = Date.now();
-                let backtests = JSON.parse(localStorage.getItem('local_backtest_reports') || '[]');
-                
-                // Добавляем новый скриншот
-                backtests.unshift({ id: timestamp, author: currentUser, date: formatDate(timestamp), image: e.target.result });
-                localStorage.setItem('local_backtest_reports', JSON.stringify(backtests));
+                const newEntry = { id: timestamp, author: currentUser, date: formatDate(timestamp), image: e.target.result };
+
+                const onSuccess = () => {
+                    renderBacktestStats();
+                    renderBacktestHistory();
+                    updateSaveButtonState();
+                    event.target.value = '';
+                    openExtraBacktestSuccessModal();
+                };
 
                 if (isFirebaseConnected && dbInstance) {
                     const backtestRef = window.fbSDK.ref(dbInstance, `${DB_NODE_NAME}_backtests`);
-                    window.fbSDK.push(backtestRef, { id: timestamp, author: currentUser, date: formatDate(timestamp), image: e.target.result });
+                    window.fbSDK.push(backtestRef, newEntry)
+                        .then(() => {
+                            onSuccess();
+                        })
+                        .catch(err => {
+                            console.error("Firebase extra backtest save error:", err);
+                            alert("Ошибка сохранения дополнительного бэктеста в базу.");
+                        });
+                } else {
+                    let backtests = JSON.parse(localStorage.getItem('local_backtest_reports') || '[]');
+                    backtests.unshift(newEntry);
+                    localStorage.setItem('local_backtest_reports', JSON.stringify(backtests));
+                    onSuccess();
                 }
-
-                // Пересчитываем статистику и перерисовываем архив
-                renderBacktestStats();
-                renderBacktestHistory();
-                updateSaveButtonState();
-
-                // Сбрасываем input, чтобы можно было выбрать следующий файл
-                event.target.value = '';
-
-                // Модалка вызывается СТРОГО по факту того, что данные записаны и архив обновился
-                openExtraBacktestSuccessModal();
             };
             reader.readAsDataURL(file);
         }
@@ -3710,7 +3715,7 @@ function handleExtraBacktest(event) {
             // Очищаем локальное хранилище бэктестов и чекбоксов обоих пользователей
             localStorage.removeItem('local_backtest_reports');
             localStorage.removeItem('weekend_checklist_Vladimir');
-            localStorage.removeItem('weekend_checklist_Max');
+            localStorage.removeItem('weekend_checklist_Timur');
 
             // Сбрасываем временные переменные картинок
             backtestImage1 = null;
