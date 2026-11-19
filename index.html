@@ -1964,7 +1964,7 @@ function forceRefreshMarquee(titleEl) {
                 const img = new Image();
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
-                    const maxDim = 2500; 
+                    const maxDim = 1800; 
                     let width = img.width;
                     let height = img.height;
 
@@ -1981,7 +1981,7 @@ function forceRefreshMarquee(titleEl) {
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
 
-                    const resizedDataUrl = canvas.toDataURL('image/jpeg', 0.92);
+                    const resizedDataUrl = canvas.toDataURL('image/jpeg', 0.82);
                     reportData.image = resizedDataUrl;
 
                     document.getElementById('preview-img').src = resizedDataUrl;
@@ -2840,28 +2840,60 @@ function resetWizard() {
             projectId: "trading-journal-timur"
         };
         
-        function loadFirebaseConfig() {
-            let savedConfig = localStorage.getItem('firebase_sync_config_timur');
-            if (!savedConfig) {
-                savedConfig = JSON.stringify(DEFAULT_CONFIG);
-                localStorage.setItem('firebase_sync_config_timur', savedConfig);
-            }
-            
-            if (savedConfig) {
-                try {
-                    const cfg = JSON.parse(savedConfig);
-                    document.getElementById('fb-database-url').value = cfg.databaseURL || '';
-                    document.getElementById('fb-api-key').value = cfg.apiKey || '';
-                    document.getElementById('fb-project-id').value = cfg.projectId || '';
-                    
-                    initFirebase(cfg);
-                } catch (e) {
-                    fallbackToLocal();
-                }
-            } else {
-                fallbackToLocal();
-            }
-        }
+       const FIREBASE_CONFIG_STORAGE_KEY = 'firebase_sync_config_timur';
+
+function loadFirebaseConfig() {
+    let savedConfig = localStorage.getItem(FIREBASE_CONFIG_STORAGE_KEY);
+    if (!savedConfig) {
+        savedConfig = JSON.stringify(DEFAULT_CONFIG);
+        localStorage.setItem(FIREBASE_CONFIG_STORAGE_KEY, savedConfig);
+    }
+
+    try {
+        const cfg = JSON.parse(savedConfig);
+        const dbUrlInput = document.getElementById('fb-database-url');
+        const apiKeyInput = document.getElementById('fb-api-key');
+        const projIdInput = document.getElementById('fb-project-id');
+
+        if (dbUrlInput) dbUrlInput.value = cfg.databaseURL || '';
+        if (apiKeyInput) apiKeyInput.value = cfg.apiKey || '';
+        if (projIdInput) projIdInput.value = cfg.projectId || '';
+
+        initFirebase(cfg);
+    } catch (e) {
+        fallbackToLocal();
+    }
+}
+
+function saveFirebaseConfig() {
+    const dbUrl = document.getElementById('fb-database-url').value.trim();
+    const apiKey = document.getElementById('fb-api-key').value.trim();
+    const projId = document.getElementById('fb-project-id').value.trim();
+
+    if (!dbUrl) {
+        alert('Укажите хотя бы Database URL');
+        return;
+    }
+
+    const cfg = { databaseURL: dbUrl, apiKey: apiKey, projectId: projId };
+    localStorage.setItem(FIREBASE_CONFIG_STORAGE_KEY, JSON.stringify(cfg));
+    toggleFirebaseModal();
+    location.reload();
+}
+
+function clearFirebaseConfig() {
+    localStorage.removeItem(FIREBASE_CONFIG_STORAGE_KEY);
+    const dbUrlInput = document.getElementById('fb-database-url');
+    const apiKeyInput = document.getElementById('fb-api-key');
+    const projIdInput = document.getElementById('fb-project-id');
+
+    if (dbUrlInput) dbUrlInput.value = '';
+    if (apiKeyInput) apiKeyInput.value = '';
+    if (projIdInput) projIdInput.value = '';
+
+    toggleFirebaseModal();
+    fallbackToLocal();
+}
 
        function initFirebase(cfg) {
             if (!window.fbSDK || !cfg.databaseURL) {
@@ -2968,27 +3000,9 @@ function resetWizard() {
             renderReportsFeed();
         }
 
-        function saveFirebaseConfig() {
-            const dbUrl = document.getElementById('fb-database-url').value.trim();
-            const apiKey = document.getElementById('fb-api-key').value.trim();
-            const projId = document.getElementById('fb-project-id').value.trim();
+        
 
-            if (!dbUrl) {
-                alert('Укажите хотя бы Database URL');
-                return;
-            }
-
-            const cfg = { databaseURL: dbUrl, apiKey: apiKey, projectId: projId };
-            localStorage.setItem('firebase_sync_config', JSON.stringify(cfg));
-            toggleFirebaseModal();
-            location.reload();
-        }
-
-        function clearFirebaseConfig() {
-            localStorage.removeItem('firebase_sync_config');
-            toggleFirebaseModal();
-            fallbackToLocal();
-        }
+        
         let backtestImageData = null;
 
       let backtestImage1 = null;
@@ -3441,34 +3455,12 @@ function deleteArchivedBacktest(event, id, fbKey) {
             onStepCheckboxChange(num);
         }
 
-       // Восстановление состояния чекбоксов из localStorage или Firebase
      function loadSavedChecklistState() {
-            // Анимация загрузки в первом главном блоке («Склонность к системной торговле»)
-            const sessionStatus = document.getElementById('weekend-session-status');
-            if (sessionStatus) {
-                sessionStatus.innerHTML = '<span class="text-amber-400 font-medium flex items-center justify-center space-x-2"><i class="fa-solid fa-spinner fa-spin"></i><span>Загрузка данных из облака...</span></span>';
-            }
-
-            if (isFirebaseConnected && dbInstance) {
-                const checklistRef = window.fbSDK.ref(dbInstance, `${DB_NODE_NAME}_checklist_${currentUser}`);
-                window.fbSDK.onValue(checklistRef, (snapshot) => {
-                    const data = snapshot.val() || {};
-                    applyChecklistVisuals(data);
-                    updateWeekendProgress();
-                    renderBacktestStats();
-                }, (error) => {
-                    console.error("Firebase checklist read error:", error);
-                    updateWeekendProgress();
-                    renderBacktestStats();
-                });
-            } else {
-                // Режим localStorage
-                const saved = JSON.parse(localStorage.getItem(`weekend_checklist_${currentUser}`) || '{}');
-                applyChecklistVisuals(saved);
-                updateWeekendProgress();
-                renderBacktestStats();
-            }
-        }
+    const saved = JSON.parse(localStorage.getItem(`weekend_checklist_${currentUser}`) || '{}');
+    applyChecklistVisuals(saved);
+    updateWeekendProgress();
+    renderBacktestStats();
+}
 
         // Вспомогательная функция отрисовки чекбоксов, текстов и мгновенного скрытия линий таймера
         function applyChecklistVisuals(data) {
